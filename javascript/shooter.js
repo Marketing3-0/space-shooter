@@ -50,6 +50,8 @@ function update() {
 	if(Math.random() < 0.1) {
 		enemies.push(new Enemy());
 	}
+
+	handleCollisions();
 }
 
 function draw() {
@@ -69,6 +71,7 @@ function Player () {
 	this.width = 32;
 	this.height = 32;
 	this.playerBullets = [];
+	this.lives = 5;
 }
 
 Player.prototype = {
@@ -121,6 +124,13 @@ Player.prototype = {
 			x: this.x + this.width/2,
 			y: this.y + this.height/2
 		};
+	},
+	explode: function () {
+		if (this.lives > 0) {
+			this.lives--;
+		} else {
+			alert("you lost");
+		}
 	}
 };
 
@@ -191,7 +201,36 @@ Enemy.prototype = {
 		this.age++;
 
 		this.active = this.active && this.inBounds();
+	},
+	explode: function () {
+		this.active = false;
 	}
 }
+
+function handleCollisions() {
+	handleBulletCollisions();
+	handleEnemyCollisions();
+}
+
+function handleEnemyCollisions() {
+	enemies.forEach(function(enemy) {	
+		if (collides(enemy, player)) {
+			enemy.explode();
+			player.explode();
+		}
+	});
+}
+
+function handleBulletCollisions () {
+		player.playerBullets.forEach(function(bullet) {
+		enemies.forEach(function(enemy) {
+			if (collides(bullet, enemy)) {
+				enemy.explode();
+				bullet.active = false;
+			}
+		});
+	});
+}
+
 //Start this thing
 setUp();
